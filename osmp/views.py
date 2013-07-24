@@ -90,7 +90,7 @@ class PaymentMixin(object):
             payment.txn_date = self.txn_date
             payment.added = True
             payment.save()
-            self.user.me.update_balance(self.money)
+            self.user.me.update_balance(self.money, "Пополнение баланса")
         return HttpResponse(self.toXml(0, "Processed", payment.txn_id, payment.money, payment.pk), content_type='application/xml')
 
     def isAccountBadFormat(self):
