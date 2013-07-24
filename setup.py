@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='django-osmp',
@@ -7,7 +7,7 @@ setup(
     author='Andrew Minkin',
     author_email='minkin.andrew@gmail.com',
     url='https://github.com/gen1us2k/django-osmp.git',
-    packages=['osmp',],
+    packages=find_packages(),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
