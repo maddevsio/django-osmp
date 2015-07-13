@@ -2,6 +2,8 @@
 from datetime import datetime
 from decimal import Decimal
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.db import IntegrityError
+from django.db import transaction
 
 from osmp.models import OSMP
 from django.conf import settings
@@ -85,18 +87,33 @@ class PaymentMixin(object):
             return HttpResponse(self.toXml(5, "Account Does Not Exist"), content_type="application/xml")
 
     def __check(self, method, *args, **kwargs):
-        payment, created = OSMP.objects.get_or_create(method=method, txn_id=self.txn_id, account=self.account)
+        try:
+            payment = OSMP.objects.get(method=method, txn_id=self.txn_id, account=self.account)
+        except OSMP.DoesNotExist:
+            try:
+                payment = OSMP.objects.create(method=method, txn_id=self.txn_id, account=self.account)
+            except IntegrityError:
+                payment = OSMP.objects.get(method=method, txn_id=self.txn_id, account=self.account)
+
         return self.toXml(0, "Processed", payment.txn_id)
 
     def __pay(self, method, *args, **kwargs):
-        payment, created = OSMP.objects.get_or_create(method=method, txn_id=self.txn_id, account=self.account)
+        try:
+            payment = OSMP.objects.get(method=method, txn_id=self.txn_id, account=self.account)
+        except OSMP.DoesNotExist:
+            try:
+                payment = OSMP.objects.create(method=method, txn_id=self.txn_id, account=self.account)
+            except IntegrityError:
+                payment = OSMP.objects.get(method=method, txn_id=self.txn_id, account=self.account)
+
         if not payment.added:
             payment.money = self.money
             payment.txn_date = self.txn_date
             payment.added = True
             payment.save()
             self.user.update_balance = getattr(self.user, settings.OSMP_UPDATE_BALANCE_PATH)
-            self.user.update_balance(self.money, "Пополнение баланса", payment=payment)
+            with transaction.atomic():
+                self.user.update_balance(self.money, "Пополнение баланса", payment=payment)
         return HttpResponse(self.toXml(0, "Processed", payment.txn_id, payment.money, payment.pk), content_type='application/xml')
 
     def isAccountBadFormat(self):

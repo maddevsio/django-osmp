@@ -1,40 +1,30 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'OSMP'
-        db.create_table('osmp', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('txn_id', self.gf('django.db.models.fields.PositiveIntegerField')(unique=True, db_index=True)),
-            ('money', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
-            ('txn_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('account', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-        ))
-        db.send_create_signal(u'osmp', ['OSMP'])
+    dependencies = [
+    ]
 
-
-    def backwards(self, orm):
-        # Deleting model 'OSMP'
-        db.delete_table('osmp')
-
-
-    models = {
-        u'osmp.osmp': {
-            'Meta': {'object_name': 'OSMP', 'db_table': "'osmp'"},
-            'account': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'money': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
-            'txn_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'txn_id': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True', 'db_index': 'True'})
-        }
-    }
-
-    complete_apps = ['osmp']
+    operations = [
+        migrations.CreateModel(
+            name='OSMP',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('txn_id', models.CharField(unique=True, max_length=255, db_index=True)),
+                ('money', models.DecimalField(default=0, max_digits=7, decimal_places=2)),
+                ('txn_date', models.DateTimeField(null=True)),
+                ('account', models.CharField(max_length=255)),
+                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('method', models.PositiveIntegerField()),
+                ('added', models.BooleanField(default=False)),
+            ],
+            options={
+                'db_table': 'osmp',
+            },
+            bases=(models.Model,),
+        ),
+    ]
