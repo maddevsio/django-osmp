@@ -20,6 +20,10 @@ class AccountDoesNotExistException(Exception):
     pass
 
 
+class UserNotActiveException(Exception):
+    pass
+
+
 class PaymentMixin(object):
     """<?xml version="1.0" encoding="UTF-8"?>
     <response>
@@ -76,7 +80,7 @@ class PaymentMixin(object):
         }
 
         try:
-            if self.isAccountBadFormat() and self.AccountIsExist():
+            if self.isAccountBadFormat() and self.AccountIsExist() and not self.AccountNotActive():
                 data = commands.get(self.command)(method)
                 return HttpResponse(data, content_type="application/xml")
 
@@ -85,6 +89,9 @@ class PaymentMixin(object):
 
         except AccountDoesNotExistException:
             return HttpResponse(self.toXml(5, "Account Does Not Exist"), content_type="application/xml")
+
+        except UserNotActiveException:
+            return HttpResponse(self.toXml(7, "Account Not Active"), content_type="application/xml")
 
     def __check(self, method, *args, **kwargs):
         try:
@@ -136,7 +143,9 @@ class PaymentMixin(object):
 
     def AccountNotActive(self, **kwargs):
         """ 79 """
-        return self.user.is_active
+        if self.user.is_blocked:
+            raise UserNotActiveException()
+        return False
 
     def DelayedPayment(self, **kwargs):
         """ 90 """
