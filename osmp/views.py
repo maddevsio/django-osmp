@@ -116,11 +116,11 @@ class PaymentMixin(object):
         if not payment.added:
             payment.money = self.money
             payment.txn_date = self.txn_date
-            payment.added = True
-            payment.save()
             self.user.update_balance = getattr(self.user, settings.OSMP_UPDATE_BALANCE_PATH)
             with transaction.atomic():
                 self.user.update_balance(self.money, "Пополнение баланса", payment=payment)
+            payment.added = True
+            payment.save()
         return HttpResponse(self.toXml(0, "Processed", payment.txn_id, payment.money, payment.pk), content_type='application/xml')
 
     def isAccountBadFormat(self):
